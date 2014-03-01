@@ -1,14 +1,38 @@
 doctype html
 html
-  body
+  head
+    script(src='/socket.io/socket.io.js')
+    script(src='/core.js')
+    script.
+      var age=!{cache.o0.time};
+      var cal=Date.now() - !{Date.now()};
+  body(onload='init()')
     include header
     block content
       p stats page
-      p='blocks:'+total
-      p='blocks till retarget:'+(total%config.retarget)
-      p='last block mined at:'+new Date(cache.o0.time*1000)
-      p='last block is '+((Date.now()/1000) - cache.o0.time)+' seconds old'
-      p='10-block inter-block delay is:'+cache.tenavg
-      p='100-block inter-block delay is:'+cache.hunavg
-      p='10-block retarget prediction:'+Math.floor(((total%config.retarget) * cache.tenavg)/3600)
-      p='100-block retarget prediction:'+Math.floor(((total%config.retarget) * cache.hunavg)/3600)
+      p blocks:
+        span(id='total')=total
+      p blocks till retarget:
+        span(id='retarget')=(config.retarget - (total%config.retarget))
+      p last block mined at:
+        span(id='last')=new Date(cache.o0.time*1000)
+      p last block is 
+        span(id='age')=Math.floor(((Date.now()/1000) - cache.o0.time))
+        |  seconds old
+      table(border=1)
+        tr
+          th
+          th 10 block avg
+          th 100 block avg
+          th 721 block avg
+        tr
+          th inter block delay
+          td(id='avg10')=cache.tenavg
+          td(id='avg100')=cache.hunavg
+          td(id='avg721')=cache.goalavg
+        tr
+          th retarget prediction
+          td(id='time10')=Math.floor(( (config.retarget-(total%config.retarget)) * cache.tenavg)/3600)
+          td(id='time100')=Math.floor(( (config.retarget-(total%config.retarget)) * cache.hunavg)/3600)
+          td(id='time721')=Math.floor(( (config.retarget-(total%config.retarget)) * cache.goalavg)/3600)
+      textarea(id='log',rows=20,cols=100)
