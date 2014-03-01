@@ -4,9 +4,9 @@ html
     include header
     block content
       p stats page
-      p='blocks:'+blocks
-      p='blocks till retarget:'+(blocks%config.retarget)
-      p='last block mined at:'+new Date(lastblock.time*1000)
-      p='last block is '+((Date.now()/1000) - lastblock.time)+' seconds old'
-      p='inter-block delay is:'+(lastblock.time - secondlast.time)
-      p='aprox hours until retarget:'+Math.floor(((blocks%config.retarget) * (lastblock.time - secondlast.time))/3600)
+      p='blocks:'+total
+      p='blocks till retarget:'+(total%config.retarget)
+      p='last block mined at:'+new Date(cache.blocks[cache.blocks.length-1].time*1000)
+      p='last block is '+((Date.now()/1000) - cache.blocks[cache.blocks.length-1].time)+' seconds old'
+      p=config.avgperiod+'-block inter-block delay is:'+cache.avgtime
+      p='aprox hours until retarget:'+Math.floor(((total%config.retarget) * cache.avgtime)/3600)
