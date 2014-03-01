@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient;
+var async = require('async');
 
 var config = require('./config');
 
@@ -31,33 +32,27 @@ function getblock(hash,cb) {
 var lastcount = 0;
 var cache = null;
 function generateStats(blockindex,cb) {
-	rpc('getblockhash',[blockindex],function (reply2) {
-		var blocks = [];
-		function iter() {
-			var count = config.avgperiod;
-			if (blocks.length > count) {
-				var sum = 0;
-				for (var x=0; x<count; x++) {
-					var a = blocks[x].time;
-					var b = blocks[x+1].time;
-					console.log(x,b-a);
-					sum += b-a;
-				}
-				cache = { avgtime: sum/count, blocks:blocks };
-				console.log(cache,sum,count);
-				lastcount = blockindex;
-				cb();
-			} else {
-				getblock(blocks[0].previousblockhash,function (block) {
-					blocks.unshift(block);
-					iter();
+	var blocks = {};
+	function makeOff(offset) {
+		return function (cb) {
+			rpc('getblockhash',[blockindex - offset],function (reply2) {
+				getblock(reply2.result,function (block) {
+					blocks['o'+offset] = block;
+					cb();
 				});
-			}
-		}
-		getblock(reply2.result,function (block) {
-			blocks.unshift(block);
-			iter();
-		});
+			});
+		};
+	}
+	async.parallel([
+		makeOff(0),
+		makeOff(10),
+		makeOff(100)
+	],function () {
+		cache = blocks;
+		cache.tenavg = (cache.o0.time - cache.o10.time)/10;
+		cache.hunavg = (cache.o0.time - cache.o100.time)/100;
+		lastcount = blockindex;
+		cb();
 	});
 }
 app.configure(function (){});
@@ -68,7 +63,7 @@ app.get('/',function (req,res) {
 			generateStats(reply.result,finish);
 		} else finish();
 		function finish() {
-			console.log(cache.blocks.length);
+			console.log(cache);
 			res.render('index',{config:config,cache:cache,total:lastcount});
 		}
 	});

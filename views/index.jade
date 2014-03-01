@@ -6,7 +6,9 @@ html
       p stats page
       p='blocks:'+total
       p='blocks till retarget:'+(total%config.retarget)
-      p='last block mined at:'+new Date(cache.blocks[cache.blocks.length-1].time*1000)
-      p='last block is '+((Date.now()/1000) - cache.blocks[cache.blocks.length-1].time)+' seconds old'
-      p=config.avgperiod+'-block inter-block delay is:'+cache.avgtime
-      p='aprox hours until retarget:'+Math.floor(((total%config.retarget) * cache.avgtime)/3600)
+      p='last block mined at:'+new Date(cache.o0.time*1000)
+      p='last block is '+((Date.now()/1000) - cache.o0.time)+' seconds old'
+      p='10-block inter-block delay is:'+cache.tenavg
+      p='100-block inter-block delay is:'+cache.hunavg
+      p='10-block retarget prediction:'+Math.floor(((total%config.retarget) * cache.tenavg)/3600)
+      p='100-block retarget prediction:'+Math.floor(((total%config.retarget) * cache.hunavg)/3600)
