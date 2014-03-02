@@ -67,6 +67,7 @@ function generateStats(blockindex,cb) {
 	}
 	async.parallel([
 		makeOff(0),
+		makeOff(1),
 		makeOff(10),
 		makeOff(100),
 		makeOff(721)

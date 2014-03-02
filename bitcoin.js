@@ -18,7 +18,16 @@ function Connection(ip,port,keep,network) {
 		this.magic = 0xfbc0b6db;
 		break;
 	}
-	var socket = net.createConnection(port,ip);
+	this._id = ip+':'+port;
+	this.ip = ip;
+	this.port = port;
+	this.keep = keep;
+	console.log(this.__proto__);
+	this.connect();
+}
+util.inherits(Connection, process.EventEmitter);
+Connection.prototype.connect = function connect() {
+	var socket = net.createConnection(this.port,this.ip);
 	this.socket = socket;
 	socket.on('data',function (input) {
 		try {
@@ -34,21 +43,22 @@ function Connection(ip,port,keep,network) {
 			throw err;
 		}
 	}.bind(this));
-	socket.on('error',function () {
+	socket.on('error',function (err) {
 		peers.update({_id:this._id},{$set:{unreachable:true}},this.log);
+		console.error('connection lost due to error',err);
+		this.connect();
 	}.bind(this));
 	socket.on('end',function () {
-		this.log('connection lost');
+		console.error('connection lost');
+		this.connect();
 	}.bind(this));
 	var p = this.makeVersion();
 	socket.write(p);
-	if (!keep) setTimeout(function() {
+	if (!this.keep) setTimeout(function() {
 		socket.destroy();
 	},120000);
 	this.log('connecting...');
-	this._id = ip+':'+port;
 }
-util.inherits(Connection, process.EventEmitter);
 Connection.prototype.log = function log() {
 	var out = Array.prototype.slice.call(arguments);
 	out.unshift(this.nick+":");

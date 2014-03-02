@@ -1,4 +1,4 @@
-var socket = io.connect('http://mars.pool.angeldsis.com:8080');
+var socket = io.connect('http://mars.stats.angeldsis.com:8080');
 function $(id) {
 	return document.getElementById(id);
 }
@@ -16,7 +16,7 @@ socket.on('block',function (hash,block,cache,retarget) {
 	$('time100').textContent = Math.floor((retarget * cache.hunavg)/3600);
 	$('time721').textContent = Math.floor((retarget * cache.goalavg)/3600);
 	
-	$('log').textContent += (new Date())+' lag:'+Math.floor(((Date.now()-cal)/1000)-cache.o0.time)+'s '+retarget+' blocks and '+$('time10').textContent+'/'+$('time100').textContent+'/'+$('time721').textContent+' hours until retarget\n';
+	$('log').textContent += (new Date())+' lag:'+Math.floor(((Date.now()-cal)/1000)-cache.o0.time)+'s time:'+(cache.o0.time - cache.o1.time)+'s '+retarget+' blocks and '+$('time10').textContent+'/'+$('time100').textContent+'/'+$('time721').textContent+' hours until retarget\n';
 });
 function init() {
 	setInterval(tick,1000);
